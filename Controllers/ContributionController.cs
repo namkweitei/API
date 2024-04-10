@@ -31,35 +31,29 @@ namespace API.Controllers
         [Authorize(Roles = "MarketingManager")]
         public async Task<ActionResult<IEnumerable<ContributionDto>>> GetContributions()
         {
-            var contributions = await _context.Contributions.Select(c => new ContributionDto
-            {
-                ContributionId = c.ContributionID,
-                Title = c.Title,
-                SubmissionDate = c.SubmissionDate,
-                ClosureDate = c.ClosureDate,
-                Content = c.Content,
-                SelectedForPublication = c.SelectedForPublication,
-                Commented = c.Commented,
-                Likes = c.Likes,
-                Dislikes = c.Dislikes,
-                Views = c.Views,
-                Status = c.Status,
-            }).ToListAsync();
-            foreach (var contribution in contributions)
-            {
-                var uploadedDocuments = await _context.UploadedDocuments
-                    .Where(d => d.ContributionId == contribution.ContributionId)
-                    .Select(d => new UploadedDocumentDto
+            var contributions = await _context.Contributions
+                .Include(c => c.Documents) // Eager load uploaded documents
+                .Select(c => new ContributionDto
+                {
+                    ContributionId = c.ContributionID,
+                    Title = c.Title,
+                    SubmissionDate = c.SubmissionDate,
+                    ClosureDate = c.ClosureDate,
+                    Content = c.Content,
+                    SelectedForPublication = c.SelectedForPublication,
+                    Commented = c.Commented,
+                    Likes = c.Likes,
+                    Dislikes = c.Dislikes,
+                    Views = c.Views,
+                    Status = c.Status,
+                    UploadedDocuments = c.Documents.Select(d => new UploadedDocumentDto
                     {
                         Id = d.Id,
                         Content = d.Content,
                         ContentType = d.ContentType
-                    })
-                    .ToListAsync();
+                    }).ToList() // Project uploaded documents into DTOs
+                }).ToListAsync(); // Execute query and return results
 
-                // Gán danh sách các tệp đính kèm vào contributionDTO
-                contribution.UploadedDocuments = uploadedDocuments;
-            }
             return contributions;
         }
 
@@ -123,6 +117,7 @@ namespace API.Controllers
             }
 
             var contributions = await _context.Contributions
+                .Include(c => c.Documents) // Eager load uploaded documents
                 .Where(c => c.UserID == currentUser.Id)
                 .Select(c => new ContributionDto
                 {
@@ -135,44 +130,16 @@ namespace API.Controllers
                     Commented = c.Commented,
                     Likes = c.Likes,
                     Dislikes = c.Dislikes,
-                    isLike = false,
-                    isDislike = false,
                     Views = c.Views,
-                    Status = c.Status
-                })
-                .ToListAsync();
-            foreach (var contribution in contributions)
-            {
-                var existingLike = await _context.LikeDislikes.FirstOrDefaultAsync(l => l.ContributionId == contribution.ContributionId && l.UserId == currentUser.Id);
-                if (existingLike != null)
-                {
-                    if (existingLike.Like)
-                    {
-                        contribution.isLike = true;
-                        contribution.isDislike = false;
-                    }
-                    else if (existingLike.Dislike)
-                    {
-                        contribution.isLike = false;
-                        contribution.isDislike = true;
-                    }
-                }
-            }
-            foreach (var contribution in contributions)
-            {
-                var uploadedDocuments = await _context.UploadedDocuments
-                    .Where(d => d.ContributionId == contribution.ContributionId)
-                    .Select(d => new UploadedDocumentDto
+                    Status = c.Status,
+                    UploadedDocuments = c.Documents.Select(d => new UploadedDocumentDto
                     {
                         Id = d.Id,
                         Content = d.Content,
                         ContentType = d.ContentType
-                    })
-                    .ToListAsync();
+                    }).ToList() // Project uploaded documents into DTOs
+                }).ToListAsync(); // Execute query and return results
 
-                // Gán danh sách các tệp đính kèm vào contributionDTO
-                contribution.UploadedDocuments = uploadedDocuments;
-            }
             return contributions;
         }
 
@@ -303,11 +270,13 @@ namespace API.Controllers
                .ToListAsync();
             return comments;
         }
+
+       
         // POST: api/contributions
         [HttpPost]
-        [Authorize]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<ContributionDto>> PostContribution( ContributionDto contributionDTO, IFormFile file)
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<ContributionPostDTO>> PostContribution([FromForm] ContributionPostDTO contributionDTO, IFormFile file)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)        
@@ -333,7 +302,7 @@ namespace API.Controllers
                     contentType = file.ContentType;
                 }
             }
-
+            ContributionStatus status =(ContributionStatus)Enum.Parse(typeof(ContributionStatus) ,contributionDTO.Status.ToString());
             var contribution = new Contribution
             {
                 Title = contributionDTO.Title,
@@ -345,7 +314,7 @@ namespace API.Controllers
                 Likes = contributionDTO.Likes,
                 Dislikes = contributionDTO.Dislikes,
                 Views = contributionDTO.Views,
-                Status = contributionDTO.Status,
+                Status = status,
                 UserID = currentUser.Id, // Set UserID from current user
                 FacultyID = currentUser.FacultyID
             };
@@ -387,7 +356,8 @@ namespace API.Controllers
         // PUT: api/contributions/{id}
         [HttpPut("{id}")]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> PutContribution(int id, ContributionDto contributionDTO, IFormFile file)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> PutContribution(int id, [FromForm] ContributionPostDTO contributionDTO, IFormFile file)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -404,6 +374,7 @@ namespace API.Controllers
             {
                 return Forbid();
             }
+            ContributionStatus status = (ContributionStatus)Enum.Parse(typeof(ContributionStatus), contributionDTO.Status.ToString());
 
             // Update contribution properties
             contribution.Title = contributionDTO.Title;
@@ -415,7 +386,7 @@ namespace API.Controllers
             contribution.Likes = contributionDTO.Likes;
             contribution.Dislikes = contributionDTO.Dislikes;
             contribution.Views = contributionDTO.Views;
-            contribution.Status = contributionDTO.Status;
+            contribution.Status = status;
             contribution.FacultyID = currentUser.FacultyID;
 
             try

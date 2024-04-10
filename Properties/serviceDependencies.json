@@ -5,12 +5,17 @@
       "connectionId": "ConnectionStrings:auth.db",
       "dynamicId": null
     },
-    "apis1": {
-      "type": "apis"
-    },
     "secrets1": {
       "type": "secrets",
       "connectionId": "VaultUri",
+      "dynamicId": null
+    },
+    "apis1": {
+      "type": "apis"
+    },
+    "mssql1": {
+      "type": "mssql",
+      "connectionId": "ConnectionStrings:DefaultConnection",
       "dynamicId": null
     }
   }

@@ -3,6 +3,8 @@ using API.Models;
 using API.Dtos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers
 {
@@ -11,10 +13,11 @@ namespace API.Controllers
     public class EventsController : ControllerBase
     {
         private readonly AppDbContext _context;
-
-        public EventsController(AppDbContext context)
+        private readonly UserManager<User> _userManager;
+        public EventsController(AppDbContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/events
@@ -32,7 +35,7 @@ namespace API.Controllers
 
         // POST: api/events
         [HttpPost]
-        public async Task<ActionResult<EventDTO >> PostEvent(EventDTO eventDTO)
+        public async Task<ActionResult<EventDTO >> PostEvent([FromForm] EventDTO eventDTO)
         {
             var @event = new Event
             {
@@ -49,23 +52,33 @@ namespace API.Controllers
         }
 
         // PUT: api/events
-        [HttpPut]
-        public async Task<IActionResult> PutEvent( Event @event)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutEvent(int id, [FromForm] EventDTO eventDTO)
         {
-            if (@event.EventID != 1) // Assume there is only one event in the system
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
             {
-                return BadRequest();
+                return Unauthorized();
             }
-
-            _context.Entry(@event).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            var @event = await _context.Events.FindAsync(id);
+            if (@event == null)
+            {
+                return NotFound();
+            }
+            @event.FacultyID = eventDTO.FacultyID;
+            @event.EventName = eventDTO.EventName;
+            @event.FinalClosureDate = eventDTO.FinalClosureDate;
+            @event.DurationBetweenClosure = eventDTO.DurationBetweenClosure;
+            @event.FirstClosureDate = eventDTO.FirstClosureDate;
 
             try
             {
+                _context.Entry(@event).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
                 await _context.SaveChangesAsync();
             }
             catch (Exception)
             {
-                if (!EventExists(@event.EventID))
+                if (!EventExists(id))
                 {
                     return NotFound();
                 }

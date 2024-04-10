@@ -1,4 +1,4 @@
-using API.Dtos;
+﻿using API.Dtos;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -23,7 +23,7 @@ namespace API.Controllers
         }
         
         [HttpPost]
-        public async Task<IActionResult> CreateRole(CreateRoleDto createRoleDto)
+        public async Task<IActionResult> CreateRole([FromForm] CreateRoleDto createRoleDto)
         {
             if(string.IsNullOrEmpty(createRoleDto.RoleName))
             {
@@ -49,19 +49,31 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoleResponseDto>>> GetRoles()
+        public async Task<IActionResult> GetRoles()
         {
-            
+            // Lấy danh sách tất cả các vai trò
+            var allRoles = await _roleManager.Roles.ToListAsync();
 
-            // list of roles with total users in each role 
+            // Khởi tạo danh sách để lưu trữ thông tin về vai trò và số lượng người dùng
+            var rolesWithUsersCount = new List<RoleResponseDto>();
 
-            var roles = await _roleManager.Roles.Select(r=>new RoleResponseDto{
-                Id = r.Id,
-                Name = r.Name,
-                TotalUsers = _userManager.GetUsersInRoleAsync(r.Name!).Result.Count
-            }).ToListAsync();
+            // Lặp qua từng vai trò và tính toán số lượng người dùng
+            foreach (var role in allRoles)
+            {
+                var usersInRole = await _userManager.GetUsersInRoleAsync(role.Name);
+                var usersCount = usersInRole.Count;
 
-            return Ok(roles);
+                // Thêm thông tin về vai trò và số lượng người dùng vào danh sách
+                rolesWithUsersCount.Add(new RoleResponseDto
+                {
+                    Id = role.Id,
+                    Name = role.Name,
+                    TotalUsers = usersCount
+                });
+            }
+
+            // Trả về danh sách các vai trò với số lượng người dùng trong mỗi vai trò
+            return Ok(rolesWithUsersCount);
         }
 
         [HttpDelete("{id}")]
@@ -87,7 +99,7 @@ namespace API.Controllers
         }
 
         [HttpPost("assign")]
-        public async Task<IActionResult> AssignRole(RoleAssignDto roleAssignDto)
+        public async Task<IActionResult> AssignRole([FromForm] RoleAssignDto roleAssignDto)
         {
             var user = await _userManager.FindByIdAsync(roleAssignDto.UserId);
 

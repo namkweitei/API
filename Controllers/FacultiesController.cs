@@ -23,7 +23,7 @@ namespace API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddFaculty(FacultyDto facultyDto)
+        public async Task<IActionResult> AddFaculty([FromForm] FacultyDto facultyDto)
         {
             if (!ModelState.IsValid)
             {
@@ -41,7 +41,7 @@ namespace API.Controllers
             return Ok(faculty);
         }
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateFaculty( int id, FacultyDto facultyDto)
+        public async Task<IActionResult> UpdateFaculty( int id, [FromForm] FacultyDto facultyDto)
         {
             var faculty = await _context.Faculties.FindAsync(id);
             if (faculty == null)

@@ -300,7 +300,7 @@ namespace API.Controllers
         // POST: api/interactions/comment
         [HttpPost("comment")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<CommentDTO>> Comment(CommentDTO commentDTO)
+        public async Task<ActionResult<CommentDTO>> Comment([FromForm] CommentDTO commentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -339,7 +339,7 @@ namespace API.Controllers
         }
         //PUT :POST: api/interactions/editcomment
         [HttpPut("editcomment/{id}")]
-        public async Task<IActionResult> PutComment(int id,  CommentDTO commentDTO)
+        public async Task<IActionResult> PutComment(int id, [FromForm] CommentDTO commentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -414,7 +414,7 @@ namespace API.Controllers
         // POST: api/interactions/comment
         [HttpPost("comment/comment")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<CommentOfComment>> CommentOfComment( CommentOfCommentDTO commentOfCommentDTO)
+        public async Task<ActionResult<CommentOfComment>> CommentOfComment([FromForm] CommentOfCommentDTO commentOfCommentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -445,7 +445,7 @@ namespace API.Controllers
         }
         //PUT :POST: api/interactions/editcomment
         [HttpPut("comment/editcomment/{id}")]
-        public async Task<ActionResult<CommentOfComment>> PutCommentOfComment(int id, CommentOfCommentDTO commentDTO)
+        public async Task<ActionResult<CommentOfComment>> PutCommentOfComment(int id, [FromForm] CommentOfCommentDTO commentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
