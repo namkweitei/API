@@ -271,7 +271,24 @@ namespace API.Controllers
             return comments;
         }
 
-       
+        // GET: api/contributions/{id}/comment
+        [HttpGet("{id}/commentofcomment")]
+        public async Task<ActionResult<IEnumerable<CommentOfCommentDTO>>> GetCommentOfComment(int id)
+        {
+            var comments = await _context.CommentOfComments
+               .Where(c => c.CommentId == id)
+               .Select(c => new CommentOfCommentDTO
+               {
+                   Id = c.Id,
+                   CommentId = c.CommentId,
+                   UserId = c.UserId,
+                   Content = c.Content,
+                   Date = c.Date,
+                   IsAnonymous = c.IsAnonymous
+               })
+               .ToListAsync();
+            return comments;
+        }
         // POST: api/contributions
         [HttpPost]
         [Authorize(Roles = "Student")]
