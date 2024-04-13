@@ -26,7 +26,7 @@ namespace API.Controllers
         // POST: api/interactions/like
         [HttpPost("like")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<LikeDislikeCountDto>> Like( int id, bool isContribution)
+        public async Task<ActionResult<LikeDislikeCountDto>> Like([FromForm] int id, bool isContribution)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -160,7 +160,7 @@ namespace API.Controllers
         // POST: api/interactions/dislike
         [HttpPost("dislike")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<LikeDislikeCountDto>> Dislike(int id, bool isContribution)
+        public async Task<ActionResult<LikeDislikeCountDto>> Dislike([FromForm] int id, bool isContribution)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)

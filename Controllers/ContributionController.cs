@@ -327,7 +327,7 @@ namespace API.Controllers
                 ClosureDate = contributionDTO.ClosureDate,
                 Content = contributionDTO.Content,
                 SelectedForPublication = contributionDTO.SelectedForPublication,
-                Commented = contributionDTO.Commented,
+                Commented = false,
                 Likes = contributionDTO.Likes,
                 Dislikes = contributionDTO.Dislikes,
                 Views = contributionDTO.Views,
@@ -458,7 +458,53 @@ namespace API.Controllers
 
             return NoContent();
         }
+        // PUT: api/contributions/{id}
+        [HttpPut("contributionAgree/{id}")]
+        public async Task<IActionResult> PutContributionAgree(int id, bool agree, int newstatus)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+            var contribution = await _context.Contributions.FindAsync(id);
+            if (contribution == null)
+            {
+                return NotFound();
+            }
 
+            if (contribution.UserID != currentUser.Id)
+            {
+                return Forbid();
+            }
+            ContributionStatus status = (ContributionStatus)Enum.Parse(typeof(ContributionStatus), newstatus.ToString());
+
+            // Update contribution properties
+         
+            contribution.Commented = agree;
+            contribution.Status = status;
+            contribution.FacultyID = currentUser.FacultyID;
+
+            try
+            {
+                _context.Entry(contribution).State = EntityState.Modified;
+                // Handle file upload if a file is provided
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ContributionExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
         // DELETE: api/contributions/{id}
         [HttpDelete("{id}")]
         [Authorize(Roles = "Student")]
