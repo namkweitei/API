@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -19,18 +20,51 @@ namespace API.Controllers
             _context = context;
             _userManager = userManager;
         }
-
-        // GET: api/events
-        [HttpGet]
-        public async Task<ActionResult<Event>> GetEvent()
+        [HttpGet("byfalculty")]
+        public async Task<IActionResult> GetEventFalculty(int id)
         {
-            var @event = await _context.Events.FindAsync(1); // Assume there is only one event in the system
-            if (@event == null)
+            var allEvents = await _context.Events.ToListAsync();
+
+            var events = new List<EventDTO>();
+            foreach (var e in allEvents)
             {
-                return NotFound();
+                if(e.FacultyID == id)
+                {
+                    events.Add(new EventDTO
+                    {
+                        EventID = e.EventID,
+                        EventName = e.EventName,
+                        FinalClosureDate = e.FinalClosureDate,
+                        FirstClosureDate = e.FirstClosureDate,
+                        DurationBetweenClosure = e.DurationBetweenClosure,
+                        FacultyID = e.FacultyID
+                    });
+                }
             }
 
-            return @event;
+            return Ok(events);
+        }
+        // GET: api/events
+        [HttpGet("all")]
+        public async Task<ActionResult<Event>> GetAllEvent()
+        {
+            var allEvents = await _context.Events.ToListAsync();
+
+            var events = new List<EventDTO>();
+            foreach (var e in allEvents)
+            {
+                events.Add(new EventDTO
+                {
+                    EventID = e.EventID,
+                    EventName = e.EventName,
+                    FinalClosureDate = e.FinalClosureDate,
+                    FirstClosureDate = e.FirstClosureDate,
+                    DurationBetweenClosure = e.DurationBetweenClosure,
+                    FacultyID = e.FacultyID
+                });
+            }
+
+            return Ok(events);
         }
 
         // POST: api/events

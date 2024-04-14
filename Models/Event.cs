@@ -12,5 +12,6 @@ namespace API.Models
         public int DurationBetweenClosure { get; set; }
         public int FacultyID { get; set; }
         public Faculty Faculty { get; set; }
+        public List<Contribution> Contributions { get; set;}
     }
 }

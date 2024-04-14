@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using API.Data;
 using API.Models;
 using API.Dtos;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Controllers
 {
@@ -20,6 +21,24 @@ namespace API.Controllers
         public FacultiesController(AppDbContext context)
         {
             _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFaulty()
+        {
+            var allFacultys = await _context.Faculties.ToListAsync();
+
+            var falcultys = new List<FacultyDto>();
+            foreach (var f in allFacultys)
+            {
+                falcultys.Add(new FacultyDto
+                {
+                    ID = f.FacultyID,
+                    FacultyName = f.FacultyName
+                });
+            }
+
+            return Ok(falcultys);
         }
 
         [HttpPost("add")]

@@ -213,42 +213,6 @@ namespace API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Contributions",
-                columns: table => new
-                {
-                    ContributionID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FacultyID = table.Column<int>(type: "int", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ClosureDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SelectedForPublication = table.Column<bool>(type: "bit", nullable: false),
-                    Commented = table.Column<bool>(type: "bit", nullable: false),
-                    Likes = table.Column<int>(type: "int", nullable: false),
-                    Dislikes = table.Column<int>(type: "int", nullable: false),
-                    Views = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Contributions", x => x.ContributionID);
-                    table.ForeignKey(
-                        name: "FK_Contributions_AspNetUsers_UserID",
-                        column: x => x.UserID,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Contributions_Faculties_FacultyID",
-                        column: x => x.FacultyID,
-                        principalTable: "Faculties",
-                        principalColumn: "FacultyID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Events",
                 columns: table => new
                 {
@@ -291,6 +255,49 @@ namespace API.Migrations
                         principalTable: "Faculties",
                         principalColumn: "FacultyID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Contributions",
+                columns: table => new
+                {
+                    ContributionID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FacultyID = table.Column<int>(type: "int", nullable: false),
+                    EventID = table.Column<int>(type: "int", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ClosureDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SelectedForPublication = table.Column<bool>(type: "bit", nullable: false),
+                    Commented = table.Column<bool>(type: "bit", nullable: false),
+                    Likes = table.Column<int>(type: "int", nullable: false),
+                    Dislikes = table.Column<int>(type: "int", nullable: false),
+                    Views = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Contributions", x => x.ContributionID);
+                    table.ForeignKey(
+                        name: "FK_Contributions_AspNetUsers_UserID",
+                        column: x => x.UserID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Contributions_Events_EventID",
+                        column: x => x.EventID,
+                        principalTable: "Events",
+                        principalColumn: "EventID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Contributions_Faculties_FacultyID",
+                        column: x => x.FacultyID,
+                        principalTable: "Faculties",
+                        principalColumn: "FacultyID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -458,6 +465,11 @@ namespace API.Migrations
                 column: "ContributionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Contributions_EventID",
+                table: "Contributions",
+                column: "EventID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Contributions_FacultyID",
                 table: "Contributions",
                 column: "FacultyID");
@@ -523,9 +535,6 @@ namespace API.Migrations
                 name: "ContributionStatistics");
 
             migrationBuilder.DropTable(
-                name: "Events");
-
-            migrationBuilder.DropTable(
                 name: "LikeDislikeComment");
 
             migrationBuilder.DropTable(
@@ -551,6 +560,9 @@ namespace API.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Faculties");

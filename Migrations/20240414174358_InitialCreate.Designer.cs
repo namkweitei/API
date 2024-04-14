@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240410034154_InitialCreate")]
+    [Migration("20240414174358_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -122,6 +122,9 @@ namespace API.Migrations
                     b.Property<int>("Dislikes")
                         .HasColumnType("int");
 
+                    b.Property<int>("EventID")
+                        .HasColumnType("int");
+
                     b.Property<int>("FacultyID")
                         .HasColumnType("int");
 
@@ -149,6 +152,8 @@ namespace API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ContributionID");
+
+                    b.HasIndex("EventID");
 
                     b.HasIndex("FacultyID");
 
@@ -606,6 +611,12 @@ namespace API.Migrations
 
             modelBuilder.Entity("API.Models.Contribution", b =>
                 {
+                    b.HasOne("API.Models.Event", "Event")
+                        .WithMany("Contributions")
+                        .HasForeignKey("EventID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("API.Models.Faculty", "Faculty")
                         .WithMany("Contributions")
                         .HasForeignKey("FacultyID")
@@ -617,6 +628,8 @@ namespace API.Migrations
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Event");
 
                     b.Navigation("Faculty");
 
@@ -754,6 +767,11 @@ namespace API.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("LikeDislikes");
+                });
+
+            modelBuilder.Entity("API.Models.Event", b =>
+                {
+                    b.Navigation("Contributions");
                 });
 
             modelBuilder.Entity("API.Models.Faculty", b =>

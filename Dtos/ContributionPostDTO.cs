@@ -18,5 +18,6 @@ namespace API.Dtos
         public bool isDislike { get; set; }
         public int Views { get; set; }
         public int Status { get; set; }
+        public int EventID { get; set; }
     }
 }

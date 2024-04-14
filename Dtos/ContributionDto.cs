@@ -18,6 +18,7 @@ namespace API.Dtos
         public bool isLike { get; set; }
         public bool isDislike { get; set; }
         public int Views { get; set; }
+        public int EventID { get; set; }
         public List<UploadedDocumentDto> UploadedDocuments { get; set; }
         public ContributionStatus Status { get; set; }
     }

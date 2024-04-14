@@ -1,10 +1,5 @@
 {
   "dependencies": {
-    "sqlite1": {
-      "type": "sqlite",
-      "connectionId": "ConnectionStrings:auth.db",
-      "dynamicId": null
-    },
     "secrets1": {
       "type": "secrets",
       "connectionId": "VaultUri",

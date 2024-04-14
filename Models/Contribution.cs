@@ -9,6 +9,7 @@ namespace API.Models
         public int ContributionID { get; set; }
         public string UserID { get; set; }
         public int FacultyID { get; set; }
+        public int EventID { get; set; }
         public string Title { get; set; }
         public DateTime SubmissionDate { get; set; }
         public DateTime ClosureDate { get; set; }
@@ -22,6 +23,7 @@ namespace API.Models
         [JsonIgnore]
         public User User { get; set; }
         public Faculty Faculty { get; set; }
+        public Event Event { get; set; }
         public List<Comment> Comments { get; set; }
         public List<UploadedDocument> Documents { get; set; }
         public List<LikeDislike> LikeDislikes { get;set; }

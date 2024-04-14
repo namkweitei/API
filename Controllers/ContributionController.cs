@@ -46,6 +46,7 @@ namespace API.Controllers
                     Dislikes = c.Dislikes,
                     Views = c.Views,
                     Status = c.Status,
+                    EventID = c.EventID,
                     UploadedDocuments = c.Documents.Select(d => new UploadedDocumentDto
                     {
                         Id = d.Id,
@@ -88,6 +89,7 @@ namespace API.Controllers
                 isDislike = false,
                 Views = contribution.Views,
                 Status = contribution.Status,
+                EventID = contribution.EventID,
             };
             var existingLike = await _context.LikeDislikes.FirstOrDefaultAsync(l => l.ContributionId == contributionDTO.ContributionId && l.UserId == currentUser.Id);
             if (existingLike != null)
@@ -132,6 +134,7 @@ namespace API.Controllers
                     Dislikes = c.Dislikes,
                     Views = c.Views,
                     Status = c.Status,
+                    EventID = c.EventID,
                     UploadedDocuments = c.Documents.Select(d => new UploadedDocumentDto
                     {
                         Id = d.Id,
@@ -170,7 +173,8 @@ namespace API.Controllers
                     isLike = false,
                     isDislike = false,
                     Views = c.Views,
-                    Status = c.Status
+                    Status = c.Status,
+                    EventID = c.EventID,
                 })
                 .ToListAsync();
             foreach( var contribution in contributions)
@@ -206,7 +210,71 @@ namespace API.Controllers
             }
             return contributions;
         }
+        //GET : api/contributions/event
+        [HttpGet("event")]
+        public async Task<ActionResult<IEnumerable<ContributionDto>>> GetContributionsByEvent(int id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
 
+            var contributions = await _context.Contributions
+                .Where(c => c.EventID == id)
+                .Select(c => new ContributionDto
+                {
+
+                    ContributionId = c.ContributionID,
+                    Title = c.Title,
+                    SubmissionDate = c.SubmissionDate,
+                    ClosureDate = c.ClosureDate,
+                    Content = c.Content,
+                    SelectedForPublication = c.SelectedForPublication,
+                    Commented = c.Commented,
+                    Likes = c.Likes,
+                    Dislikes = c.Dislikes,
+                    isLike = false,
+                    isDislike = false,
+                    Views = c.Views,
+                    Status = c.Status,
+                    EventID = c.EventID,
+                })
+                .ToListAsync();
+            foreach (var contribution in contributions)
+            {
+                var existingLike = await _context.LikeDislikes.FirstOrDefaultAsync(l => l.ContributionId == contribution.ContributionId && l.UserId == currentUser.Id);
+                if (existingLike != null)
+                {
+                    if (existingLike.Like)
+                    {
+                        contribution.isLike = true;
+                        contribution.isDislike = false;
+                    }
+                    else if (existingLike.Dislike)
+                    {
+                        contribution.isLike = false;
+                        contribution.isDislike = true;
+                    }
+                }
+            }
+            foreach (var contribution in contributions)
+            {
+                var uploadedDocuments = await _context.UploadedDocuments
+                    .Where(d => d.ContributionId == contribution.ContributionId)
+                    .Select(d => new UploadedDocumentDto
+                    {
+                        Id = d.Id,
+                        Content = d.Content,
+                        ContentType = d.ContentType
+                    })
+                    .ToListAsync();
+
+                // Gán danh sách các tệp đính kèm vào contributionDTO
+                contribution.UploadedDocuments = uploadedDocuments;
+            }
+            return contributions;
+        }
         // GET: api/contributions/{id}/file
         [HttpGet("{id}/file")]
         public async Task<IActionResult> DownloadFile(int id)
@@ -333,7 +401,8 @@ namespace API.Controllers
                 Views = contributionDTO.Views,
                 Status = status,
                 UserID = currentUser.Id, // Set UserID from current user
-                FacultyID = currentUser.FacultyID
+                FacultyID = currentUser.FacultyID,
+                EventID = contributionDTO.EventID
             };
 
             _context.Contributions.Add(contribution);
@@ -405,6 +474,7 @@ namespace API.Controllers
             contribution.Views = contributionDTO.Views;
             contribution.Status = status;
             contribution.FacultyID = currentUser.FacultyID;
+            contribution.EventID = contributionDTO.EventID;
 
             try
             {

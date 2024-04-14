@@ -50,7 +50,11 @@ namespace API.Data
                 .WithMany(f => f.Contributions)
                 .HasForeignKey(c => c.FacultyID)
                 .OnDelete(DeleteBehavior.Restrict); // Nếu muốn xóa khoa thì không xóa các Contributions liên quan
-
+            modelBuilder.Entity<Contribution>()
+               .HasOne(c => c.Event)
+               .WithMany(f => f.Contributions)
+               .HasForeignKey(c => c.EventID)
+               .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Comment>()
                 .HasOne(c => c.Contribution)
                 .WithMany(c => c.Comments)
