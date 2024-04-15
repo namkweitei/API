@@ -35,10 +35,10 @@ namespace API.Controllers
                 .Include(c => c.Documents) // Eager load uploaded documents
                 .Select(c => new ContributionDto
                 {
+                    
                     ContributionId = c.ContributionID,
                     Title = c.Title,
                     SubmissionDate = c.SubmissionDate,
-                    ClosureDate = c.ClosureDate,
                     Content = c.Content,
                     SelectedForPublication = c.SelectedForPublication,
                     Commented = c.Commented,
@@ -47,6 +47,7 @@ namespace API.Controllers
                     Views = c.Views,
                     Status = c.Status,
                     EventID = c.EventID,
+                    UserID = c.UserID,
                     UploadedDocuments = c.Documents.Select(d => new UploadedDocumentDto
                     {
                         Id = d.Id,
@@ -79,7 +80,6 @@ namespace API.Controllers
                 ContributionId = contribution.ContributionID,
                 Title = contribution.Title,
                 SubmissionDate = contribution.SubmissionDate,
-                ClosureDate = contribution.ClosureDate,
                 Content = contribution.Content,
                 SelectedForPublication = contribution.SelectedForPublication,
                 Commented = contribution.Commented,
@@ -126,7 +126,6 @@ namespace API.Controllers
                     ContributionId = c.ContributionID,
                     Title = c.Title,
                     SubmissionDate = c.SubmissionDate,
-                    ClosureDate = c.ClosureDate,
                     Content = c.Content,
                     SelectedForPublication = c.SelectedForPublication,
                     Commented = c.Commented,
@@ -164,7 +163,6 @@ namespace API.Controllers
                     ContributionId = c.ContributionID,
                     Title = c.Title,
                     SubmissionDate = c.SubmissionDate,
-                    ClosureDate = c.ClosureDate,
                     Content = c.Content,
                     SelectedForPublication = c.SelectedForPublication,
                     Commented = c.Commented,
@@ -228,7 +226,6 @@ namespace API.Controllers
                     ContributionId = c.ContributionID,
                     Title = c.Title,
                     SubmissionDate = c.SubmissionDate,
-                    ClosureDate = c.ClosureDate,
                     Content = c.Content,
                     SelectedForPublication = c.SelectedForPublication,
                     Commented = c.Commented,
@@ -392,7 +389,6 @@ namespace API.Controllers
             {
                 Title = contributionDTO.Title,
                 SubmissionDate = DateTime.Now,
-                ClosureDate = contributionDTO.ClosureDate,
                 Content = contributionDTO.Content,
                 SelectedForPublication = contributionDTO.SelectedForPublication,
                 Commented = false,
@@ -465,7 +461,6 @@ namespace API.Controllers
             // Update contribution properties
             contribution.Title = contributionDTO.Title;
             contribution.SubmissionDate = DateTime.Now;
-            contribution.ClosureDate = contributionDTO.ClosureDate;
             contribution.Content = contributionDTO.Content;
             contribution.SelectedForPublication = contributionDTO.SelectedForPublication;
             contribution.Commented = contributionDTO.Commented;

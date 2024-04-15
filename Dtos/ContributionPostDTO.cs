@@ -8,7 +8,6 @@ namespace API.Dtos
         public int ContributionId { get; set; }
         public string Title { get; set; }
         public DateTime SubmissionDate { get; set; }
-        public DateTime ClosureDate { get; set; }
         public string Content { get; set; }
         public bool SelectedForPublication { get; set; }
         public bool Commented { get; set; }

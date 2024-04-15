@@ -9,7 +9,6 @@ namespace API.Dtos
         public int ContributionId { get; set; } 
         public string Title { get; set; }
         public DateTime SubmissionDate { get; set; }
-        public DateTime ClosureDate { get; set; }
         public string Content { get; set; }
         public bool SelectedForPublication { get; set; }
         public bool Commented { get; set; }
@@ -19,6 +18,7 @@ namespace API.Dtos
         public bool isDislike { get; set; }
         public int Views { get; set; }
         public int EventID { get; set; }
+        public string UserID { get; set; }  
         public List<UploadedDocumentDto> UploadedDocuments { get; set; }
         public ContributionStatus Status { get; set; }
     }
