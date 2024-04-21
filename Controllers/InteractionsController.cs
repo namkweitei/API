@@ -122,7 +122,6 @@ namespace API.Controllers
                         Dislike = false
                     };
                     _context.LikeDislikeComment.Add(likeDislikeComment);
-
                 }
                 else
                 {
@@ -145,7 +144,6 @@ namespace API.Controllers
                         };
                         _context.LikeDislikeComment.Add(likeDislikeComment);
                     }
-
                 }
                 var likeDislikeCountDto = new LikeDislikeCountDto
                 {
@@ -339,6 +337,7 @@ namespace API.Controllers
         }
         //PUT :POST: api/interactions/editcomment
         [HttpPut("editcomment/{id}")]
+        [Authorize(Roles = " Student")]
         public async Task<IActionResult> PutComment(int id, [FromForm] CommentDTO commentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -356,8 +355,6 @@ namespace API.Controllers
             {
                 return Forbid();
             }
-
-            // Update contribution properties
             comment.Date = DateTime.Now;
             comment.Content = commentDTO.Content;
             comment.IsAnonymous = commentDTO.IsAnonymous;
@@ -377,7 +374,6 @@ namespace API.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
         private bool CommentExists(int id)
@@ -386,7 +382,7 @@ namespace API.Controllers
         }
         // DELETE: api/interactions/delete/{id}
         [HttpDelete("deleteComment/{id}")]
-       
+        [Authorize(Roles = " Student")]
         public async Task<IActionResult> DeleteComment(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -445,6 +441,7 @@ namespace API.Controllers
         }
         //PUT :POST: api/interactions/editcomment
         [HttpPut("comment/editcomment/{id}")]
+        [Authorize(Roles = " Student")]
         public async Task<ActionResult<CommentOfComment>> PutCommentOfComment(int id, [FromForm] CommentOfCommentDTO commentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -492,7 +489,7 @@ namespace API.Controllers
         }
         // DELETE: api/interactions/delete/{id}
         [HttpDelete("comment/deleteComment/{id}")]
-
+        [Authorize(Roles = " Student")]
         public async Task<IActionResult> DeleteCommentOfComment(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);

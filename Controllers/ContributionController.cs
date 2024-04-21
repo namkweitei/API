@@ -32,7 +32,7 @@ namespace API.Controllers
         public async Task<ActionResult<IEnumerable<ContributionDto>>> GetContributions()
         {
             var contributions = await _context.Contributions
-                .Include(c => c.Documents) // Eager load uploaded documents
+                .Include(c => c.Documents) 
                 .Select(c => new ContributionDto
                 {
                     
@@ -53,8 +53,8 @@ namespace API.Controllers
                         Id = d.Id,
                         Content = d.Content,
                         ContentType = d.ContentType
-                    }).ToList() // Project uploaded documents into DTOs
-                }).ToListAsync(); // Execute query and return results
+                    }).ToList() 
+                }).ToListAsync(); 
 
             return contributions;
         }
@@ -69,12 +69,10 @@ namespace API.Controllers
                 return Unauthorized();
             }
             var contribution = await _context.Contributions.FindAsync(id);
-
             if (contribution == null)
             {
                 return NotFound();
             }
-
             var contributionDTO = new ContributionDto
             {
                 ContributionId = contribution.ContributionID,
@@ -109,7 +107,7 @@ namespace API.Controllers
         }
         // GET: api/contributions/user
         [HttpGet("user")]
-        [Authorize(Roles = "MarketingCoordinator, Student")]
+        [Authorize(Roles = " Student")]
         public async Task<ActionResult<IEnumerable<ContributionDto>>> GetContributionsByUser()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -117,9 +115,8 @@ namespace API.Controllers
             {
                 return Unauthorized();
             }
-
             var contributions = await _context.Contributions
-                .Include(c => c.Documents) // Eager load uploaded documents
+                .Include(c => c.Documents) 
                 .Where(c => c.UserID == currentUser.Id)
                 .Select(c => new ContributionDto
                 {
@@ -139,14 +136,13 @@ namespace API.Controllers
                         Id = d.Id,
                         Content = d.Content,
                         ContentType = d.ContentType
-                    }).ToList() // Project uploaded documents into DTOs
-                }).ToListAsync(); // Execute query and return results
-
+                    }).ToList() 
+                }).ToListAsync(); 
             return contributions;
         }
-
         //GET : api/contributions/faculty
         [HttpGet("faculty")]
+        [Authorize(Roles = "MarketingCoordinator , Student" )]
         public async Task<ActionResult<IEnumerable<ContributionDto>>> GetContributionsByFaculty()
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -281,9 +277,7 @@ namespace API.Controllers
             {
                 return NotFound();
             }
-
-            // Xác định định dạng của tệp tin dựa trên contentType hoặc phần mở rộng của tệp tin
-            string fileExtension = ".dat"; // Giả sử mặc định là .dat
+            string fileExtension = ".dat"; 
             switch (uploadedDocument.ContentType)
             {
                 case "application/msword":
@@ -298,20 +292,13 @@ namespace API.Controllers
                 case "image/png":
                     fileExtension = ".png";
                     break;
-                // Thêm các trường hợp khác tùy thuộc vào các loại MIME khác
                 default:
-                    // Có thể sử dụng phần mở rộng tệp tin hoặc loại MIME mặc định cho các trường hợp không xác định được
                     break;
             }
 
-            // Tạo tên tệp tin mới với định dạng dự đoán
             string fileName = $"contribution_{id}{fileExtension}";
-
-            // Tạo tệp tin tạm thời từ dữ liệu byte
             var tempFilePath = Path.Combine(Path.GetTempPath(), fileName);
             System.IO.File.WriteAllBytes(tempFilePath, uploadedDocument.Content);
-
-            // Trả về tệp tin dưới dạng phản hồi từ API
             return PhysicalFile(tempFilePath, "application/octet-stream", fileName);
         }
 
@@ -372,12 +359,11 @@ namespace API.Controllers
                     return BadRequest("Invalid file format. Only Word documents (doc, docx) and images (jpg, jpeg, png, bmp) are allowed.");
                 }
             }
-            // Xử lý tệp đính kèm nếu có
             byte[] fileContent = null;
             string contentType = null;
             if (file != null)
             {
-                using (var ms = new MemoryStream())
+                using (var ms = new MemoryStream()) 
                 {
                     await file.CopyToAsync(ms);
                     fileContent = ms.ToArray();
@@ -400,10 +386,8 @@ namespace API.Controllers
                 FacultyID = currentUser.FacultyID,
                 EventID = contributionDTO.EventID
             };
-
             _context.Contributions.Add(contribution);
             await _context.SaveChangesAsync();
-            // Thêm tệp đính kèm vào cơ sở dữ liệu nếu có
             if (fileContent != null && !string.IsNullOrEmpty(contentType))
             {
                 var uploadedDocument = new UploadedDocument
@@ -415,12 +399,24 @@ namespace API.Controllers
                 _context.UploadedDocuments.Add(uploadedDocument);
                 await _context.SaveChangesAsync();
             }
-
             var coordinators = await _userManager.GetUsersInRoleAsync("MarketingCoordinator");
             foreach (var coordinator in coordinators)
             {
-                var subject = "New Contribution Submitted";
-                var message = $"A new contribution has been submitted by a student. Please review it.";
+                var subject = "Notification of new student posts";
+                var title = contribution.Title;
+                var author = currentUser.UserName;
+                var dateSent = DateTime.Now.ToString("yyyy-MM-dd"); 
+                var message = $@"<p>Subject: {subject}</p>
+                            <br/>
+                            <p>Here are the details of the article:</p>
+                            <br/>
+                            <p>Title: {title}</p>
+                            <p>Author: {author}</p>
+                            <p>Date sent: {dateSent}</p>
+                            <br/>
+                            <p>Please take a moment to review the post and ensure it meets our guidelines and standards. Your feedback and approval are greatly appreciated.</p>
+                            <br/>
+                            <p>Thank you for your attention to this issue.</p>";
                 await _emailService.SendEmailAsync(coordinator.Email, subject, message);
             }
 
@@ -432,8 +428,6 @@ namespace API.Controllers
             var fileExtension = Path.GetExtension(file.FileName).ToLower();
             return allowedExtensions.Contains(fileExtension);
         }
-
-
 
         // PUT: api/contributions/{id}
         [HttpPut("{id}")]
@@ -457,8 +451,6 @@ namespace API.Controllers
                 return Forbid();
             }
             ContributionStatus status = (ContributionStatus)Enum.Parse(typeof(ContributionStatus), contributionDTO.Status.ToString());
-
-            // Update contribution properties
             contribution.Title = contributionDTO.Title;
             contribution.SubmissionDate = DateTime.Now;
             contribution.Content = contributionDTO.Content;
@@ -470,24 +462,17 @@ namespace API.Controllers
             contribution.Status = status;
             contribution.FacultyID = currentUser.FacultyID;
             contribution.EventID = contributionDTO.EventID;
-
             try
             {
                 _context.Entry(contribution).State = EntityState.Modified;
-
-                // Handle file upload if a file is provided
                 if (file != null)
                 {
-                    // Process the file (save to database, etc.)
-                    // Example: Save file to database
                     byte[] fileContent = null;
                     using (var ms = new MemoryStream())
                     {
                         await file.CopyToAsync(ms);
                         fileContent = ms.ToArray();
                     }
-
-                    // Update or add file to database
                     var uploadedDocument = await _context.UploadedDocuments.FirstOrDefaultAsync(d => d.ContributionId == contribution.ContributionID);
                     if (uploadedDocument == null)
                     {
@@ -525,7 +510,8 @@ namespace API.Controllers
         }
         // PUT: api/contributions/{id}
         [HttpPut("contributionAgree/{id}")]
-        public async Task<IActionResult> PutContributionAgree(int id, bool agree, int newstatus)
+        [Authorize(Roles = "MarketingCoordinator")]
+        public async Task<IActionResult> PutContributionAgree(int id, bool agree, bool publication, int newstatus, string comment)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -543,9 +529,7 @@ namespace API.Controllers
                 return Forbid();
             }
             ContributionStatus status = (ContributionStatus)Enum.Parse(typeof(ContributionStatus), newstatus.ToString());
-
-            // Update contribution properties
-         
+            contribution.SelectedForPublication = publication;
             contribution.Commented = agree;
             contribution.Status = status;
             contribution.FacultyID = currentUser.FacultyID;
@@ -553,7 +537,31 @@ namespace API.Controllers
             try
             {
                 _context.Entry(contribution).State = EntityState.Modified;
-                // Handle file upload if a file is provided
+                if(comment != "")
+                {
+                    var student = await _userManager.FindByIdAsync(contribution.UserID);
+                    var subject = "Notification of contributions ";
+                    var author = student.UserName;
+                    var title = contribution.Title;
+                    var dateSent = DateTime.Now.ToString("yyyy-MM-dd");
+                    var pub = publication == true ? "Yes" : "No";
+                    var sts = status.ToString();
+                    var message = $@"<p>Subject: {subject}</p>
+                            <br/>
+                            <p>Here are the contribution's evaluation details:</p>
+                            <br/>
+                            <p>Author: {author}</p>
+                            <p>Date sent: {dateSent}</p>
+                            <br/>
+                            <p>Publication : {pub}<p>
+                            <p>Status: {sts}<p>
+                            <br/>
+                            <p>Comment : {comment}</p>
+                            <br/>
+                            <p>Thank you for your attention to this issue.</p>";
+                    await _emailService.SendEmailAsync(student.Email, subject, message);
+                }
+                
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

@@ -32,6 +32,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> Register([FromForm] RegisterDto registerDto)
         {
             if (!ModelState.IsValid)
@@ -73,7 +74,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromForm]LoginDto loginDto)
+        public async Task<IActionResult> Login([FromForm] LoginDto loginDto)
         {
             if (!ModelState.IsValid)
             {
@@ -150,8 +151,8 @@ namespace API.Controllers
             return _userManager.GetRolesAsync(user).Result.ToArray();
         }
 
-        // Các phương thức API sửa đổi:
         [HttpGet("{userId}")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> GetUserById(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -170,7 +171,7 @@ namespace API.Controllers
                 Id = user.Id,
                 Email = user.Email,
                 FullName = user.FullName,
-                Roles = GetUserRoles(user), // Sử dụng phương thức mới để lấy danh sách vai trò
+                Roles = GetUserRoles(user),
                 PhoneNumber = user.PhoneNumber,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 AccessFailedCount = user.AccessFailedCount,
@@ -195,7 +196,7 @@ namespace API.Controllers
                 Id = user.Id,
                 Email = user.Email,
                 FullName = user.FullName,
-                Roles = GetUserRoles(user), // Sử dụng phương thức mới để lấy danh sách vai trò
+                Roles = GetUserRoles(user),
                 PhoneNumber = user.PhoneNumber,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 AccessFailedCount = user.AccessFailedCount,
@@ -203,9 +204,9 @@ namespace API.Controllers
         }
 
         [HttpGet("users")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> GetAllUsers()
         {
-            // Lấy danh sách tất cả người dùng
             var users = await _userManager.Users.ToListAsync();
 
             var userDetails = new List<UserDetailDto>();
@@ -217,7 +218,7 @@ namespace API.Controllers
                     Id = user.Id,
                     Email = user.Email,
                     FullName = user.FullName,
-                    Roles = GetUserRoles(user), 
+                    Roles = GetUserRoles(user),
                     PhoneNumber = user.PhoneNumber,
                     PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                     AccessFailedCount = user.AccessFailedCount,
@@ -227,7 +228,7 @@ namespace API.Controllers
             return Ok(userDetails);
         }
         [HttpPut("{userId}")]
-        [Authorize(Roles = "Admin")] // Chỉ admin mới có quyền sửa thông tin người dùng
+        [Authorize(Roles = "Admin")] 
         public async Task<IActionResult> UpdateUser(string userId, [FromForm] UpdateUserDto updateUserDto)
         {
             var user = await _userManager.FindByIdAsync(userId);

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using System.Reflection;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace API.Controllers
@@ -25,6 +26,7 @@ namespace API.Controllers
 
         // GET: api/dashboard/contributions/latest
         [HttpGet("contributions/latest")]
+        [Authorize(Roles = "MarketingManager")]
         public ActionResult<IEnumerable<Contribution>> GetLatestContributions()
         {
             var latestContributions = _context.Contributions.OrderByDescending(c => c.SubmissionDate).Take(10).ToList();
@@ -33,6 +35,7 @@ namespace API.Controllers
 
         // GET: api/dashboard/contributions/byfaculty
         [HttpGet("contributions/byfaculty")]
+        [Authorize(Roles = "MarketingManager")]
         public ActionResult<IEnumerable<object>> GetContributionsByFaculty()
         {
             var contributionsByFaculty = _context.Contributions
@@ -50,6 +53,7 @@ namespace API.Controllers
 
         // GET: api/dashboard/contributions/popular
         [HttpGet("contributions/popular")]
+        [Authorize(Roles = "MarketingManager")]
         public ActionResult<IEnumerable<Contribution>> GetPopularContributions()
         {
             var popularContributions = _context.Contributions.OrderByDescending(c => (c.Likes + c.Dislikes)).Take(10).ToList();
@@ -58,6 +62,7 @@ namespace API.Controllers
 
         // GET: api/dashboard/contributions/mostviewed
         [HttpGet("contributions/mostviewed")]
+        [Authorize(Roles = "MarketingManager")]
         public ActionResult<IEnumerable<Contribution>> GetMostViewedContributions()
         {
             var mostViewedContributions = _context.Contributions.OrderByDescending(c => c.Views).Take(10).ToList();
@@ -66,6 +71,7 @@ namespace API.Controllers
 
         // GET: api/dashboard/statistics
         [HttpGet("statistics")]
+        [Authorize(Roles = "MarketingManager")]
         public async Task<ActionResult<DashboardStatisticsDTO>> GetDashboardStatistics()
         {
             var dashboardStatistics = new DashboardStatisticsDTO();
@@ -93,6 +99,7 @@ namespace API.Controllers
 
         // GET: api/dashboard/export/statistics
         [HttpGet("export/statistics/zip")]
+        [Authorize(Roles = "MarketingManager")]
         public async Task<IActionResult> ExportStatisticsZip()
         {
             // Export dashboard statistics to images in JPG, PNG format
@@ -149,6 +156,7 @@ namespace API.Controllers
         }
         // GET: api/dashboard/export/statistics
         [HttpGet("export/statistics/excel")]
+        [Authorize(Roles = "MarketingManager")]
         public async Task<IActionResult> ExportStatisticsExcel()
         {
 

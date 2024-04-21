@@ -9,6 +9,7 @@ using API.Data;
 using API.Models;
 using API.Dtos;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
@@ -27,7 +28,6 @@ namespace API.Controllers
         public async Task<IActionResult> GetFaulty()
         {
             var allFacultys = await _context.Faculties.ToListAsync();
-
             var falcultys = new List<FacultyDto>();
             foreach (var f in allFacultys)
             {
@@ -37,29 +37,26 @@ namespace API.Controllers
                     FacultyName = f.FacultyName
                 });
             }
-
             return Ok(falcultys);
         }
-
         [HttpPost("add")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> AddFaculty([FromForm] FacultyDto facultyDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
             var faculty = new Faculty
             {
                 FacultyName = facultyDto.FacultyName
             };
-
             _context.Faculties.Add(faculty);
             await _context.SaveChangesAsync();
-
             return Ok(faculty);
         }
         [HttpPut("update/{id}")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> UpdateFaculty( int id, [FromForm] FacultyDto facultyDto)
         {
             var faculty = await _context.Faculties.FindAsync(id);
@@ -72,10 +69,10 @@ namespace API.Controllers
 
             _context.Faculties.Update(faculty);
             await _context.SaveChangesAsync();
-
             return Ok(faculty);
         }
         [HttpDelete("delete/{id}")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> DeleteFaculty(int id)
         {
             var faculty = await _context.Faculties.FindAsync(id);

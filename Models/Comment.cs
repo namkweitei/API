@@ -6,14 +6,14 @@ namespace API.Models
     {
         [Key]
         public int Id { get; set; }
-        public int ContributionId { get; set; } // ID của bài báo
-        public string UserId { get; set; } // ID của người dùng (sinh viên hoặc ẩn danh)
+        public int ContributionId { get; set; } 
+        public string UserId { get; set; } 
         public string Content { get; set; }
         public DateTime Date { get; set; }
-        public bool IsAnonymous { get; set; } // Xác định liệu bình luận này có phải ẩn danh hay không
-        public bool Hidden { get; set; } // Xác định liệu bình luận này đã bị ẩn đi hay không
-        public int Likes { get; set; } // Số lượt thích
-        public int Dislikes { get; set; } // Số lượt không thích
+        public bool IsAnonymous { get; set; } 
+        public bool Hidden { get; set; } 
+        public int Likes { get; set; } 
+        public int Dislikes { get; set; }
         public Contribution Contribution { get; set; }
         public List<LikeDislikeComment> LikeDislikeComments { get; set; }
         public List<CommentOfComment> CommentOfComments { get; set; }

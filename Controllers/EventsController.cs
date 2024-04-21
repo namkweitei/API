@@ -42,7 +42,6 @@ namespace API.Controllers
                     });
                 }
             }
-
             return Ok(events);
         }
         // GET: api/events
@@ -70,6 +69,7 @@ namespace API.Controllers
 
         // POST: api/events
         [HttpPost]
+        [Authorize(Roles = " Admin")]
         public async Task<ActionResult<EventDTO >> PostEvent([FromForm] EventDTO eventDTO)
         {
             var @event = new Event
@@ -85,9 +85,9 @@ namespace API.Controllers
 
             return eventDTO;
         }
-
         // PUT: api/events
         [HttpPut("{id}")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> PutEvent(int id, [FromForm] EventDTO eventDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
@@ -105,7 +105,6 @@ namespace API.Controllers
             @event.FinalClosureDate = eventDTO.FinalClosureDate;
             @event.DurationBetweenClosure = eventDTO.DurationBetweenClosure;
             @event.FirstClosureDate = eventDTO.FirstClosureDate;
-
             try
             {
                 _context.Entry(@event).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
@@ -122,16 +121,15 @@ namespace API.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
-
         private bool EventExists(int id)
         {
             return _context.Events.Any(e => e.EventID == id);
         }
         // DELETE: api/eventdelete/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = " Admin")]
         public async Task<IActionResult> DeleteEvent(int id)
         {
             var currentUser = await _userManager.GetUserAsync(User);
