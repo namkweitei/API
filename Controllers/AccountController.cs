@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace API.Controllers
@@ -204,7 +203,7 @@ namespace API.Controllers
         }
 
         [HttpGet("users")]
-        [Authorize(Roles = " Admin")]
+        [Authorize(Roles = " Admin , MarketingCoordinator , MarketingManager")]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -241,12 +240,45 @@ namespace API.Controllers
                     Message = "User not found"
                 });
             }
-
             user.FullName = updateUserDto.FullName;
             user.Email = updateUserDto.Email;
             user.PhoneNumber = updateUserDto.PhoneNumber;
 
             var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest(result.Errors);
+            }
+
+            return Ok(new AuthResponseDto
+            {
+                IsSuccess = true,
+                Message = "User updated successfully"
+            });
+        }
+        [HttpDelete("{userId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.Id == currentUser.Id)
+            {
+                return Forbid();
+            }
+
+            var result = await _userManager.DeleteAsync(user);
 
             if (!result.Succeeded)
             {

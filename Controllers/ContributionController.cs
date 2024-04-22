@@ -28,7 +28,7 @@ namespace API.Controllers
 
         // GET: api/contributions
         [HttpGet]
-        [Authorize(Roles = "MarketingManager")]
+        [Authorize(Roles = "MarketingManager , Admin, MarketingCoordinator")]
         public async Task<ActionResult<IEnumerable<ContributionDto>>> GetContributions()
         {
             var contributions = await _context.Contributions
