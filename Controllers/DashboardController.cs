@@ -68,7 +68,30 @@ namespace API.Controllers
             var mostViewedContributions = _context.Contributions.OrderByDescending(c => c.Views).Take(10).ToList();
             return mostViewedContributions;
         }
+        // GET: api/dashboard/contributions/countstudentpost
+        [HttpGet("contributions/countstudentpost")]
+        [Authorize(Roles = "MarketingManager")]
+        public async Task<ActionResult<List<CountStudentPost>>> GetCountStudentPost()
+        {
+            var allFacultys = await _context.Faculties.ToListAsync();
+            var countStudentPostContributions = new List<CountStudentPost>();
 
+            for (int i = 0; i < allFacultys.Count(); i++)
+            {
+                var allUser = await _context.Users
+                                    .Where(u => u.FacultyID == allFacultys[i].FacultyID)
+                                    .ToListAsync();
+                
+               
+                countStudentPostContributions.Add(new CountStudentPost
+                {
+                    FaculID = allFacultys[i].FacultyID,
+                    CountStudent = allUser.Count(),
+                    CountStudentPostContribution = 
+                }) ;
+            }
+            return countStudentPostContributions;
+        }
         // GET: api/dashboard/statistics
         [HttpGet("statistics")]
         [Authorize(Roles = "MarketingManager")]
@@ -241,5 +264,11 @@ namespace API.Controllers
             throw new InvalidOperationException($"DbSet<{entityType.Name}> not found in DbContext.");
         }
     }
-    
+    public class CountStudentPost
+    {
+        public int FaculID { get; set; } 
+        public string FaculName { get; set; }
+        public int CountStudent {  get; set; }
+        public int CountStudentPostContribution { get; set;}
+    }
 }
