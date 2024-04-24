@@ -410,7 +410,7 @@ namespace API.Controllers
         // POST: api/interactions/comment
         [HttpPost("comment/comment")]
         [Authorize(Roles = "Student")]
-        public async Task<ActionResult<CommentOfComment>> CommentOfComment([FromForm] CommentOfCommentDTO commentOfCommentDTO)
+        public async Task<ActionResult<CommentOfCommentDTO>> CommentOfComment([FromForm] CommentOfCommentDTO commentOfCommentDTO)
         {
             var currentUser = await _userManager.GetUserAsync(User);
             if (currentUser == null)
@@ -418,13 +418,13 @@ namespace API.Controllers
                 return Unauthorized();
             }
 
-            var contribution = await _context.Contributions.FindAsync(commentOfCommentDTO.CommentId);
-            if (contribution == null)
+            var comment = await _context.Comments.FindAsync(commentOfCommentDTO.CommentId);
+            if (comment == null)
             {
                 return NotFound();
             }
 
-            var comment = new CommentOfComment
+            var commentOfComment = new CommentOfComment
             {
                 CommentId = commentOfCommentDTO.CommentId,
                 UserId = currentUser.Id,
@@ -434,10 +434,10 @@ namespace API.Controllers
 
             };
 
-            _context.CommentOfComments.Add(comment);
+            _context.CommentOfComments.Add(commentOfComment);
             await _context.SaveChangesAsync();
 
-            return comment;
+            return commentOfCommentDTO;
         }
         //PUT :POST: api/interactions/editcomment
         [HttpPut("comment/editcomment/{id}")]

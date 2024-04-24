@@ -17,11 +17,9 @@ namespace API.Controllers
     public class DashboardController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        public DashboardController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
+        public DashboardController(AppDbContext context)
         {
             _context = context;
-            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: api/dashboard/contributions/latest
@@ -68,30 +66,7 @@ namespace API.Controllers
             var mostViewedContributions = _context.Contributions.OrderByDescending(c => c.Views).Take(10).ToList();
             return mostViewedContributions;
         }
-        // GET: api/dashboard/contributions/countstudentpost
-        [HttpGet("contributions/countstudentpost")]
-        [Authorize(Roles = "MarketingManager")]
-        public async Task<ActionResult<List<CountStudentPost>>> GetCountStudentPost()
-        {
-            var allFacultys = await _context.Faculties.ToListAsync();
-            var countStudentPostContributions = new List<CountStudentPost>();
-
-            for (int i = 0; i < allFacultys.Count(); i++)
-            {
-                var allUser = await _context.Users
-                                    .Where(u => u.FacultyID == allFacultys[i].FacultyID)
-                                    .ToListAsync();
-                
-               
-                countStudentPostContributions.Add(new CountStudentPost
-                {
-                    FaculID = allFacultys[i].FacultyID,
-                    CountStudent = allUser.Count(),
-                    CountStudentPostContribution = 
-                }) ;
-            }
-            return countStudentPostContributions;
-        }
+       
         // GET: api/dashboard/statistics
         [HttpGet("statistics")]
         [Authorize(Roles = "MarketingManager")]
@@ -112,6 +87,7 @@ namespace API.Controllers
                     FacultyId = f.FacultyID,
                     FacultyName = f.FacultyName,
                     NumberOfContributions = f.Contributions.Count(),
+                    NumberOfUser = _context.Users.Select(u => u.FacultyID == f.FacultyID).Count(),
                     PercentageOfContribution = (double)f.Contributions.Count() / dashboardStatistics.TotalContributions * 100,
                     NumberOfContributors = f.Contributions.Select(c => c.UserID).Distinct().Count()
                 })
@@ -125,16 +101,11 @@ namespace API.Controllers
         [Authorize(Roles = "MarketingManager")]
         public async Task<IActionResult> ExportStatisticsZip()
         {
-            // Export dashboard statistics to images in JPG, PNG format
-            // (Not implemented)
-
             // Export uploaded documents to a ZIP file
             var documents = await _context.UploadedDocuments.ToListAsync();
             var tempFolderPath = Path.Combine(Path.GetTempPath(), "ExportedFiles");
             Directory.CreateDirectory(tempFolderPath);
-
             var zipFilePath = Path.Combine(Path.GetTempPath(), $"ExportedFiles_{DateTime.Now:yyyyMMddHHmmss}.zip");
-
             using (var archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
             {
                 foreach (var document in documents)
@@ -142,13 +113,9 @@ namespace API.Controllers
                     var fileName = $"Document_{document.Id}{GetFileExtension(document.ContentType)}";
                     var filePath = Path.Combine(tempFolderPath, fileName);
                     await System.IO.File.WriteAllBytesAsync(filePath, document.Content);
-
                     archive.CreateEntryFromFile(filePath, fileName);
                 }
             }
-
-            // Export database tables to an Excel file (Not implemented)
-
             // Return the ZIP file to the client
             var memoryStream = new MemoryStream();
             using (var stream = new FileStream(zipFilePath, FileMode.Open))
@@ -156,10 +123,8 @@ namespace API.Controllers
                 await stream.CopyToAsync(memoryStream);
             }
             memoryStream.Position = 0;
-
             return File(memoryStream, "application/zip", "ExportedFiles.zip");
         }
-
         private string GetFileExtension(string contentType)
         {
             switch (contentType)
@@ -183,7 +148,7 @@ namespace API.Controllers
         public async Task<IActionResult> ExportStatisticsExcel()
         {
 
-            // Export database tables to an Excel file (Not implemented)
+            // Export database tables to an Excel file 
             var excelFilePath = Path.Combine(Path.GetTempPath(), $"ExportedExcel_{DateTime.Now:yyyyMMddHHmmss}.xlsx");
 
             using (var package = new ExcelPackage(new FileInfo(excelFilePath)))
@@ -250,25 +215,6 @@ namespace API.Controllers
             }
         }
 
-        // Method to get DbSet for an entity type
-        private dynamic GetDbSetForEntityType(AppDbContext dbContext, Type entityType)
-        {
-            var dbSetProperty = dbContext.GetType().GetProperties()
-                .FirstOrDefault(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>) && p.PropertyType.GenericTypeArguments[0] == entityType);
-
-            if (dbSetProperty != null)
-            {
-                return dbSetProperty.GetValue(dbContext);
-            }
-
-            throw new InvalidOperationException($"DbSet<{entityType.Name}> not found in DbContext.");
-        }
     }
-    public class CountStudentPost
-    {
-        public int FaculID { get; set; } 
-        public string FaculName { get; set; }
-        public int CountStudent {  get; set; }
-        public int CountStudentPostContribution { get; set;}
-    }
+  
 }
