@@ -515,8 +515,7 @@ namespace API.Controllers
             return NoContent();
         }
         // GET: api/notifications
-        [HttpGet("notifications")]
-        [Authorize(Roles = "Student")]
+        [HttpGet("notifications")] 
         public async Task<ActionResult<IEnumerable<NotificationDTO>>> GetNotifications()
         {
             var currentUser = await _userManager.GetUserAsync(User);

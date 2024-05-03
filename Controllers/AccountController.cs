@@ -199,6 +199,7 @@ namespace API.Controllers
                 PhoneNumber = user.PhoneNumber,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 AccessFailedCount = user.AccessFailedCount,
+                FacultyID = user.FacultyID
             });
         }
 
@@ -221,6 +222,8 @@ namespace API.Controllers
                     PhoneNumber = user.PhoneNumber,
                     PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                     AccessFailedCount = user.AccessFailedCount,
+                    FacultyID = user.FacultyID
+                    
                 });
             }
 

@@ -10,5 +10,6 @@ namespace API.Dtos
         public bool TwoFacotrEnabled { get; set; }
         public bool PhoneNumberConfirmed { get; set; }
         public int AccessFailedCount { get; set; }
+        public int FacultyID { get; set; }
     }
 }
